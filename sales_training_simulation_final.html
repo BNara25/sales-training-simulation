@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handling Customer Objections — Interactive Sales Simulation (Final)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .trust-meter {
+            background: linear-gradient(90deg, #10b981 0%, #10b981 60%, #e5e7eb 60%, #e5e7eb 100%);
+        }
+        
+        .choice-button {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .choice-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .choice-good {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .choice-good:hover {
+            border-color: #059669;
+        }
+        
+        .choice-neutral {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .choice-neutral:hover {
+            border-color: #d97706;
+        }
+        
+        .choice-poor {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        
+        .choice-poor:hover {
+            border-color: #2563eb;
+        }
+        
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .customer-avatar {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+        }
+        
+        .learner-avatar {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .flowchart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            padding: 2rem;
+        }
+        
+        .flowchart-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+        
+        .flowchart-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-width: 180px;
+        }
+        
+        .flowchart-box {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-weight: 600;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .start-node {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+        }
+        
+        .success-node {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .neutral-node {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .failure-node {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 12px solid #6b7280;
+            margin: 0.5rem 0;
+        }
+        
+        .arrow-right {
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 12px solid #6b7280;
+            margin: 0 1rem;
+        }
+        
+        .vertical-line {
+            width: 2px;
+            height: 40px;
+            background-color: #6b7280;
+            margin: 0.5rem 0;
+        }
+        
+        .horizontal-line {
+            height: 2px;
+            width: 60px;
+            background-color: #6b7280;
+            margin: 0 1rem;
+        }
+        
+        .feedback-card {
+            transition: all 0.3s ease;
+        }
+        
+        .feedback-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Handling Customer Objections</h1>
+            <p class="text-xl text-gray-600">Interactive Sales Simulation</p>
+        </div>
+
+        <!-- Main Simulation Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-12">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-8 text-center">Scenario: Budget Objection</h2>
+            
+            <!-- Customer Message -->
+            <div class="flex items-start gap-4 mb-8 p-6 bg-gray-50 rounded-xl">
+                <div class="customer-avatar avatar">
+                    C
+                </div>
+                <div class="flex-1">
+                    <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-indigo-500">
+                        <p class="text-lg text-gray-800 font-medium">"I'm not sure this fits our budget."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response Options -->
+            <div class="space-y-4 mb-8">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">Choose your response:</h3>
+                
+                <button class="choice-button choice-good w-full p-4 rounded-xl text-left flex items-center gap-4">
+                    <span class="text-2xl">1️⃣</span>
+                    <span class="text-lg font-medium">"I completely understand. Can you share your budget range?"</span>
+                </button>
+                
+                <button class="choice-button choice-poor w-full p-4 rounded-xl text-left flex items-center gap-4">
+                    <span class="text-2xl">2️⃣</span>
+                    <span class="text-lg font-medium">"Our product is worth every penny—you'll see!"</span>
+                </button>
+                
+                <button class="choice-button choice-neutral w-full p-4 rounded-xl text-left flex items-center gap-4">
+                    <span class="text-2xl">3️⃣</span>
+                    <span class="text-lg font-medium">"If I can customize an offer, would that help?"</span>
+                </button>
+            </div>
+
+            <!-- Trust Meter -->
+            <div class="bg-gray-100 p-6 rounded-xl">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-600">Trust Level</span>
+                    <span class="text-sm font-medium text-gray-600">60%</span>
+                </div>
+                <div class="w-full bg-gray-300 rounded-full h-3">
+                    <div class="trust-meter h-3 rounded-full"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Decision Pathways Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-12">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-8 text-center">Decision Pathways</h2>
+            
+            <div class="flowchart-container">
+                <!-- Start Node -->
+                <div class="flowchart-node">
+                    <div class="flowchart-box start-node">
+                        <span class="text-lg">🎯 Start</span>
+                    </div>
+                </div>
+                
+                <!-- Vertical Arrow Down -->
+                <div class="arrow"></div>
+                
+                <!-- Choice Level -->
+                <div class="flowchart-row">
+                    <div class="flowchart-node">
+                        <div class="flowchart-box success-node">
+                            <span class="text-sm">Choice 1: Empathy</span>
+                        </div>
+                        <div class="vertical-line"></div>
+                        <div class="arrow"></div>
+                        <div class="flowchart-box success-node">
+                            <span class="text-sm">🎯 Success<br/>Trust ↑</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flowchart-node">
+                        <div class="flowchart-box failure-node">
+                            <span class="text-sm">Choice 2: Defensive</span>
+                        </div>
+                        <div class="vertical-line"></div>
+                        <div class="arrow"></div>
+                        <div class="flowchart-box failure-node">
+                            <span class="text-sm">❌ Lost Sale<br/>Trust ↓</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flowchart-node">
+                        <div class="flowchart-box neutral-node">
+                            <span class="text-sm">Choice 3: Solution</span>
+                        </div>
+                        <div class="vertical-line"></div>
+                        <div class="arrow"></div>
+                        <div class="flowchart-box neutral-node">
+                            <span class="text-sm">🔄 Follow-Up<br/>Neutral</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-8 text-center">Learning Feedback</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Positive Feedback -->
+                <div class="feedback-card bg-green-50 border-2 border-green-200 rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                            <span class="text-white text-xl font-bold">✓</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-green-800">Positive Feedback</h3>
+                    </div>
+                    <p class="text-green-700 text-lg leading-relaxed">
+                        "Great job! You built trust through empathy. Asking about their budget range shows you're listening and want to find a solution that works for them."
+                    </p>
+                    <div class="mt-4 p-3 bg-green-100 rounded-lg">
+                        <p class="text-sm text-green-600 font-medium">💡 Key Learning: Active listening builds rapport</p>
+                    </div>
+                </div>
+
+                <!-- Negative Feedback -->
+                <div class="feedback-card bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                            <span class="text-white text-xl font-bold">!</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-blue-800">Areas for Improvement</h3>
+                    </div>
+                    <p class="text-blue-700 text-lg leading-relaxed">
+                        "Avoid being defensive about pricing. Instead of pushing the product's value, ask open-ended questions to understand their concerns better."
+                    </p>
+                    <div class="mt-4 p-3 bg-blue-100 rounded-lg">
+                        <p class="text-sm text-blue-600 font-medium">💡 Better Approach: "What factors are most important in your decision?"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 text-gray-500">
+            <p class="text-sm">Interactive Sales Training Module • Built for Modern Learning</p>
+        </div>
+    </div>
+</body>
+</html>
